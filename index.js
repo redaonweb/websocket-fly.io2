@@ -20,9 +20,20 @@ wss.on('connection', (ws) => {
   console.log('Client connected');
 
   ws.on('message', (message) => {
-    console.log('Received:', message);
-    broadcast(message);
-  });
+	try {
+		// Convert buffer to string first
+		const text = message.toString('utf8'); // or just message.toString()
+		const parsed = JSON.parse(text);
+		console.log('✅ Parsed JSON:', parsed);
+
+		broadcast(JSON.stringify(parsed));
+	} catch (err) {
+		console.error('❌ JSON Parse Error:', err.message);
+		console.error('🔍 Raw message:', message);
+		ws.send(JSON.stringify({ error: 'Invalid JSON', details: err.message }));
+	}
+});
+
 
   ws.on('close', () => {
     console.log('Client disconnected');
