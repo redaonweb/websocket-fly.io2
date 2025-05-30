@@ -21,7 +21,7 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (message) => {
     console.log('Received:', message);
-    broadcast(`Echo: ${message}`);
+    broadcast(message);
   });
 
   ws.on('close', () => {
