@@ -40,3 +40,13 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     console.log('Client disconnected');
+  });
+});
+
+app.get('/', (req, res) => {
+  res.send('WebSocket Server is running.');
+});
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
