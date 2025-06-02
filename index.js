@@ -1,6 +1,6 @@
 const express = require('express');
 const http = require('http');
-const WebSocket = require('ws');More actions
+const WebSocket = require('ws');
 const PORT = process.env.PORT || 3000;
 
 const app = express();
@@ -20,9 +20,6 @@ wss.on('connection', (ws) => {
   console.log('Client connected');
 
   ws.on('message', (message) => {
-    console.log('Received:', message);
-    broadcast(message);
-  });
 	try {
 		// Convert buffer to string first
 		const text = message.toString('utf8'); // or just message.toString()
