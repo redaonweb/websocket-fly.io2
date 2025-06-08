@@ -1,5 +1,7 @@
 app = "your-app-name"
 
+primary_region = "mad"  # 🏁 Set Madrid as default region
+
 [build]
 
 [env]
@@ -16,3 +18,13 @@ app = "your-app-name"
   [[services.ports]]
     handlers = ["tls", "http"]
     port = 443
+
+[deploy]
+  strategy = "immediate"  # Optional: ensures quick deployment
+
+[experimental]
+  auto_rollback = true    # Optional safety flag
+
+# Optional: define backup regions
+[regions]
+  backup_regions = ["cdg"]  # Paris as a backup (can also use "ams" or "lhr")
