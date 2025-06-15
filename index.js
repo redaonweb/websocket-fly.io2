@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
-const axios = require('axios'); // Required for Telegram API
+const axios = require('axios');
 const PORT = process.env.PORT || 3000;
 
 const TELEGRAM_BOT_TOKEN = '7361030705:AAGjqCk1KHeXW6p7Cv9i4h_HNe7mJriN7-U';
@@ -11,16 +11,27 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-// Send message to Telegram
-function sendToTelegram(message) {
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-  return axios.post(url, {
-    chat_id: TELEGRAM_CHAT_ID,
-    text: `<b>New Alert:</b>\n<pre>${message}</pre>`,
-    parse_mode: 'HTML'
-  }).catch(err => {
-    console.error('❌ Failed to send to Telegram:', err.response?.data || err.message);
-  });
+// Format and send message to Telegram
+function sendToTelegramFormatted(data) {
+  try {
+    const message =
+      `New + ${data.data?.action || 'Unknown'}\n` +
+      `Center : ${data.data?.Center || 'N/A'}\n` +
+      `Type : ${data.data?.VisaSubType || 'N/A'}\n` +
+      `Category : ${data.data?.Category || 'N/A'}\n` +
+      `Time : ${new Date(data.timestamp).toISOString()}`;
+
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    return axios.post(url, {
+      chat_id: TELEGRAM_CHAT_ID,
+      text: message,
+      parse_mode: 'HTML'
+    }).catch(err => {
+      console.error('❌ Failed to send to Telegram:', err.response?.data || err.message);
+    });
+  } catch (err) {
+    console.error('❌ Failed to format or send Telegram message:', err.message);
+  }
 }
 
 // Broadcast to all clients
@@ -45,7 +56,7 @@ wss.on('connection', (ws) => {
       console.log(`[${timestamp}] ✅ Parsed JSON: ${compactLog}`);
 
       broadcast(compactLog);
-      sendToTelegram(compactLog);
+      sendToTelegramFormatted(parsed);
     } catch (err) {
       console.error(`[${new Date().toISOString()}] ❌ JSON Parse Error: ${err.message}`);
       console.error(`[${new Date().toISOString()}] 🔍 Raw message: ${message.toString('utf8')}`);
