@@ -14,12 +14,13 @@ const wss = new WebSocket.Server({ server });
 // Format and send message to Telegram
 function sendToTelegramFormatted(data) {
   try {
+    const timeOnly = new Date(data.timestamp).toLocaleTimeString('en-GB', { hour12: false });
     const message =
-      `New + ${data.data?.action || 'Unknown'}\n` +
+      `New ${data.data?.action || 'Unknown'}\n\n` +
       `Center : ${data.data?.Center || 'N/A'}\n` +
       `Type : ${data.data?.VisaSubType || 'N/A'}\n` +
-      `Category : ${data.data?.Category || 'N/A'}\n` +
-      `Time : ${new Date(data.timestamp).toISOString()}`;
+      `Category : ${data.data?.Category || 'N/A'}\n\n` +
+      `At : ${timeOnly}`;
 
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
     return axios.post(url, {
