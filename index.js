@@ -4,8 +4,8 @@ const WebSocket = require('ws');
 const axios = require('axios'); // Required for Telegram API
 const PORT = process.env.PORT || 3000;
 
-const TELEGRAM_BOT_TOKEN = 'YOUR_BOT_TOKEN_HERE';
-const TELEGRAM_CHAT_ID = '@your_channel_username'; // or '-1001234567890' for private channels
+const TELEGRAM_BOT_TOKEN = '7361030705:AAGjqCk1KHeXW6p7Cv9i4h_HNe7mJriN7-U';
+const TELEGRAM_CHAT_ID = '-1002608885423'; // or '-1001234567890' for private channels
 
 const app = express();
 const server = http.createServer(app);
