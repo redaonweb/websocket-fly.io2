@@ -13,22 +13,30 @@ const wss = new WebSocket.Server({ server });
 
 function sendToTelegramFormatted(data) {
   try {
+    const action = data.data?.action;
+
     const gmtPlus1Date = new Date(data.timestamp);
     const localTime = new Date(gmtPlus1Date.getTime() + 60 * 60 * 1000); // GMT+1
     const timeOnly = localTime.toLocaleTimeString('en-GB', { hour12: false });
 
-    const baseMessage =
-      `New ${data.data?.action || 'Unknown'}\n\n` +
+    let title = '';
+    if (action === "Appointment Taken") {
+      title = "New Appointment Reserved Successfully!";
+    } else if (action && action !== "Appointment Available") {
+      title = `New ${action}`;
+    }
+
+    const message =
+      `${title ? title + '\n\n' : ''}` +
       `Center : ${data.data?.Center || 'N/A'}\n` +
       `Type : ${data.data?.VisaSubType || 'N/A'}\n` +
-      `Category : ${data.data?.Category || 'N/A'}\n`;
+      `Category : ${data.data?.Category || 'N/A'}\n` +
+      `\nAt : ${timeOnly}`;
 
-    const datesList = Array.isArray(data.data?.dates) && data.data.dates.length > 0? `\nDates : ${data.data.dates.join(', ')}\n` : '';
-    const fullMessage = `${baseMessage}${datesList}\nAt : ${timeOnly}`;
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
     return axios.post(url, {
       chat_id: TELEGRAM_CHAT_ID,
-      text: fullMessage,
+      text: message,
       parse_mode: 'HTML'
     }).catch(err => {
       console.error('❌ Failed to send to Telegram:', err.response?.data || err.message);
