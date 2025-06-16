@@ -5,27 +5,30 @@ const axios = require('axios');
 const PORT = process.env.PORT || 3000;
 
 const TELEGRAM_BOT_TOKEN = '7361030705:AAGjqCk1KHeXW6p7Cv9i4h_HNe7mJriN7-U';
-const TELEGRAM_CHAT_ID = '-1002608885423'; // or '-1001234567890' for private channels
+const TELEGRAM_CHAT_ID = '-1002608885423';
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-// Format and send message to Telegram
 function sendToTelegramFormatted(data) {
   try {
-    const timeOnly = new Date(data.timestamp).toLocaleTimeString('en-GB', { hour12: false });
-    const message =
+    const gmtPlus1Date = new Date(data.timestamp);
+    const localTime = new Date(gmtPlus1Date.getTime() + 60 * 60 * 1000); // GMT+1
+    const timeOnly = localTime.toLocaleTimeString('en-GB', { hour12: false });
+
+    const baseMessage =
       `New ${data.data?.action || 'Unknown'}\n\n` +
       `Center : ${data.data?.Center || 'N/A'}\n` +
       `Type : ${data.data?.VisaSubType || 'N/A'}\n` +
-      `Category : ${data.data?.Category || 'N/A'}\n\n` +
-      `At : ${timeOnly}`;
+      `Category : ${data.data?.Category || 'N/A'}\n`;
 
+    const datesList = Array.isArray(data.data?.dates) && data.data.dates.length > 0? `\nDates : ${data.data.dates.join(', ')}\n` : '';
+    const fullMessage = `${baseMessage}${datesList}\nAt : ${timeOnly}`;
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
     return axios.post(url, {
       chat_id: TELEGRAM_CHAT_ID,
-      text: message,
+      text: fullMessage,
       parse_mode: 'HTML'
     }).catch(err => {
       console.error('❌ Failed to send to Telegram:', err.response?.data || err.message);
@@ -35,7 +38,6 @@ function sendToTelegramFormatted(data) {
   }
 }
 
-// Broadcast to all clients
 function broadcast(data) {
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
