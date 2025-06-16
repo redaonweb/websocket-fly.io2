@@ -21,17 +21,22 @@ function sendToTelegramFormatted(data) {
 
     let title = '';
     if (action === "Appointment Taken") {
-      title = "New Appointment Reserved Successfully!";
+      title = "✅ Appointment Reserved Successfully!";
     } else if (action && action !== "Appointment Available") {
       title = `New ${action}`;
     }
+
+    const datesList = Array.isArray(data.data?.dates) && data.data.dates.length > 0
+      ? `\nDates : ${data.data.dates.join(', ')}\n`
+      : '';
 
     const message =
       `${title ? title + '\n\n' : ''}` +
       `Center : ${data.data?.Center || 'N/A'}\n` +
       `Type : ${data.data?.VisaSubType || 'N/A'}\n` +
       `Category : ${data.data?.Category || 'N/A'}\n` +
-      `\nAt : ${timeOnly}`;
+      `${datesList}\n` +
+      `At : ${timeOnly}`;
 
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
     return axios.post(url, {
